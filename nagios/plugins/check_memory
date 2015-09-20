@@ -135,7 +135,7 @@ $real_used_pc = (100 * $real_used) / $total_memory;
 $buffer_used_pc = (100 * $buffer_memory) / $total_memory;
 $cache_used_pc = (100 * $cache_memory) / $total_memory;
 # Some people have no swap.
-if (($total_swap > 0) && ($ignore_swap == 0)) {
+if ($total_swap > 0) {
        $swap_used = ($total_swap - $free_swap);
        $swap_used_pc = (100 - ((100 / $total_swap) * $free_swap));
 } else {
@@ -144,10 +144,10 @@ if (($total_swap > 0) && ($ignore_swap == 0)) {
 }
 
 $retval = 0;
-if ($swap_used_pc > $critical){
+if (($ignore_swap == 0) && ($swap_used_pc > $critical)){
     $retval = 2;
 }
-elsif ($swap_used_pc > $warning){
+elsif (($ignore_swap == 0) && ($swap_used_pc > $warning)){
     $retval = 1;
 }
 if ($real_used_pc > $critical){
@@ -167,11 +167,7 @@ if ($retval == 0) {
     $status = "UNKNOWN"
 }
 
-if ($ignore_swap == 0) {
-	printf "MEMORY %s: real %.0f%% (%.0f/%.0f MB), buffer: %.0f MB, cache: %.0f MB, swap: %.0f%% (%.0f/%.0f MB)|real=%.0f;%.0f;%.0f;0;100 buffers=%.0f;%.0f;%.0f;0;100 cache=%.0f;%.0f;%.0f;0;100 swap=%.0f;%.0f;%.0f;0;100\n", $status, $real_used_pc, $real_used, $total_memory, $buffer_memory, $cache_memory, $swap_used_pc, $swap_used, $total_swap, $real_used_pc, $warning, $critical, $buffer_used_pc, $warning, $critical, $cache_used_pc, $warning, $critical, $swap_used_pc, $warning, $critical;
-} else {
-	printf "MEMORY %s: real %.0f%% (%.0f/%.0f MB), buffer: %.0f MB, cache: %.0f MB, swap: ignored|real=%.0f;%.0f;%.0f;0;100 buffers=%.0f;%.0f;%.0f;0;100 cache=%.0f;%.0f;%.0f;0;100\n", $status, $real_used_pc, $real_used, $total_memory, $buffer_memory, $cache_memory, $real_used_pc, $warning, $critical, $buffer_used_pc, $warning, $critical, $cache_used_pc, $warning, $critical;
-}
+printf "MEMORY %s: real %.0f%% (%.0f/%.0f MB), buffer: %.0f MB, cache: %.0f MB, swap: %.0f%% (%.0f/%.0f MB)|real=%.0f;%.0f;%.0f;0;100 buffers=%.0f;%.0f;%.0f;0;100 cache=%.0f;%.0f;%.0f;0;100 swap=%.0f;%.0f;%.0f;0;100\n", $status, $real_used_pc, $real_used, $total_memory, $buffer_memory, $cache_memory, $swap_used_pc, $swap_used, $total_swap, $real_used_pc, $warning, $critical, $buffer_used_pc, $warning, $critical, $cache_used_pc, $warning, $critical, $swap_used_pc, $warning, $critical;
 
 exit $retval;
 
@@ -186,7 +182,7 @@ Returns memory utilisation.
 Usage: $script -w <warning threshold> -c <critical threshold> [-s]
 Options: -w     Warning threshold (integer)
          -c     Critical threshold (integer)
-         -s     Disable swap monitoring (useful in OpenVZ)
+         -s     Disable threshold checking for swap (useful in OpenVZ)
 
 USAGE
     exit 1;
